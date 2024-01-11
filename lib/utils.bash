@@ -28,14 +28,14 @@ list_all_versions() {
 
 get_arch() {
 	ARCH="$(uname -m)"
-	if [ $ARCH="x86_64" ]; then
+	if [ "$ARCH" = "x86_64" ]; then
 		ARCH="amd64"
 	fi
-	echo $ARCH
+	echo "$ARCH"
 }
 
 get_os() {
-	echo $(uname -s | tr '[:upper:]' '[:lower:]')
+	uname -s | tr '[:upper:]' '[:lower:]'
 }
 
 download_release() {
