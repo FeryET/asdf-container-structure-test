@@ -7,15 +7,24 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
+version_file=$(mktemp)
+# shellcheck source=./lib/latest-stable
+source "${plugin_dir}/bin/latest-stable" 2> /dev/null 1> $version_file 
+version=$(< $version_file)
+rm -f $version_file
+
+# generate the correct version string for latest
+if [ $ASDF_INSTALL_VERSION=$version ] 
+then
+    version="latest"
+else
+    version="v$ASDF_INSTALL_VERSION"
+fi
 
 mkdir -p "$ASDF_DOWNLOAD_PATH"
-release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME/archive/refs/tags/v$ASDF_INSTALL_VERSION.tar.gz"
 
-# Download tar.gz file to the download directory
-download_release "$ASDF_INSTALL_VERSION" "$release_file"
+release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME"
 
-#  Extract contents of tar.gz file into the download directory
-tar -xzf "$release_file" -C "$ASDF_DOWNLOAD_PATH" --strip-components=1 || fail "Could not extract $release_file"
+download_release "$version" "$release_file"
 
-# Remove the tar.gz file since we don't need to keep it
-rm "$release_file"
+chmod +x $release_file

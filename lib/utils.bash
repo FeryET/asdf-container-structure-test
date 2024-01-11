@@ -4,19 +4,12 @@ set -euo pipefail
 
 GH_REPO="https://github.com/GoogleContainerTools/container-structure-test"
 TOOL_NAME="container-structure-test"
-TOOL_TEST="container-structure-test --help"
+TOOL_TEST="container-structure-test version"
 
 fail() {
 	echo -e "asdf-$TOOL_NAME: $*"
 	exit 1
 }
-
-curl_opts=(-fsSL)
-
-# NOTE: You might want to remove this if container-structure-test is not hosted on GitHub releases.
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
-fi
 
 sort_versions() {
 	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
@@ -33,15 +26,36 @@ list_all_versions() {
 	list_github_tags
 }
 
+get_arch() {
+	ARCH="$(uname -m)"
+	if [ $ARCH="x86_64" ]; then
+		ARCH="amd64"
+	fi
+	echo $ARCH
+}
+
+get_os() {
+	echo $(uname -s | tr '[:upper:]' '[:lower:]')
+}
+
 download_release() {
 	local version filename url
 	version="$1"
 	filename="$2"
 
-	url="$GH_REPO/archive/v${version}.tar.gz"
-
-	echo "* Downloading $TOOL_NAME release $version..."
-	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
+	url="https://storage.googleapis.com/$TOOL_NAME/$version/$TOOL_NAME-$(get_os)-$(get_arch)"
+	echo ""
+	echo "---------------------"
+	echo "*   Download info    "
+	echo "---------------------"
+	echo "	url: $url"
+	echo "	tool: $TOOL_NAME"
+	echo "	version: $version"
+	echo "	downloaded_filename: $filename"
+	echo "---------------------"
+	echo ""
+	echo "Download in progress..."
+	curl -fsSL -o "$filename" "$url" || fail "Could not download $url"
 }
 
 install_version() {
@@ -58,7 +72,7 @@ install_version() {
 		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
 
 		local tool_cmd
-		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
+		tool_cmd="$(echo "$TOOL_TEST" | cut -d ' ' -f1)"
 		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
 
 		echo "$TOOL_NAME $version installation was successful!"
