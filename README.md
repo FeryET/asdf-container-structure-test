@@ -8,21 +8,24 @@
 
 # Contents
 
+- [asdf-container-structure-test  ](#asdf-container-structure-test--)
+- [Contents](#contents)
 - [Dependencies](#dependencies)
-- [Install](#install)
+- [Installation](#installation)
+    - [Plugin](#plugin)
+    - [Container Structure Test Package](#container-structure-test-package)
 - [Contributing](#contributing)
 - [License](#license)
 
 # Dependencies
 
-**TODO: adapt this section**
-
 - `bash`, `curl`, `tar`, and [POSIX utilities](https://pubs.opengroup.org/onlinepubs/9699919799/idx/utilities.html).
-- `SOME_ENV_VAR`: set this environment variable in your shell config to load the correct version of tool x.
 
-# Install
+# Installation
 
-Plugin:
+### Plugin
+
+In order to install the plugin you should execute the following commands:
 
 ```shell
 asdf plugin add container-structure-test
@@ -30,13 +33,15 @@ asdf plugin add container-structure-test
 asdf plugin add container-structure-test https://github.com/FeryET/asdf-container-structure-test.git
 ```
 
-container-structure-test:
+### Container Structure Test Package
+
+After installing the plugin, you can use `asdf` to either install the package locally or globally via explicit version pinning.
 
 ```shell
 # Show all installable versions
 asdf list-all container-structure-test
 
-# Install specific version
+# Install latest version
 asdf install container-structure-test latest
 
 # Set a version globally (on your ~/.tool-versions file)
