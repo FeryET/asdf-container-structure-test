@@ -7,23 +7,24 @@ plugin_dir=$(dirname "$(dirname "$current_script_path")")
 
 # shellcheck source=./lib/utils.bash
 source "${plugin_dir}/lib/utils.bash"
-version_file=$(mktemp)
-# shellcheck source=./bin/latest-stable
-source "${plugin_dir}/bin/latest-stable" 2>/dev/null 1>"$version_file"
-version=$(<"$version_file")
-rm -f "$version_file"
-
-# generate the correct version string for latest
-if [ "$ASDF_INSTALL_VERSION" = "$version" ]; then
-	version="latest"
-else
-	version="v$ASDF_INSTALL_VERSION"
-fi
 
 mkdir -p "$ASDF_DOWNLOAD_PATH"
 
+# translate 'latest' to sensible version
+if [ "$ASDF_INSTALL_VERSION" == "latest" ]; then
+	latest_version_file=$(mktemp)
+	source "${plugin_dir}/bin/latest-stable" 2>/dev/null 1>"$latest_version_file"
+	ASDF_INSTALL_VERSION="$(<"$latest_version_file")"
+	rm -f "$latest_version_file"
+fi
+
+# make sure version starts with 'v'
+if [ "$ASDF_INSTALL_VERSION" != "v*" ]; then
+	ASDF_INSTALL_VERSION="v$ASDF_INSTALL_VERSION"
+fi
+
 release_file="$ASDF_DOWNLOAD_PATH/$TOOL_NAME"
 
-download_release "$version" "$release_file"
+download_release "$ASDF_INSTALL_VERSION" "$release_file"
 
 chmod +x "$release_file"

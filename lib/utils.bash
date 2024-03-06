@@ -38,12 +38,22 @@ get_os() {
 	uname -s | tr '[:upper:]' '[:lower:]'
 }
 
+function to_comparable_version { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+
 download_release() {
 	local version filename url
 	version="$1"
 	filename="$2"
-
-	url="https://storage.googleapis.com/$TOOL_NAME/$version/$TOOL_NAME-$(get_os)-$(get_arch)"
+	# shellcheck disable=SC2046
+	if [ $(to_comparable_version "$version") -ge $(to_comparable_version "v1.17.0") ]; then
+		# From version 1.17.0 onwards the binaries are stored
+		# in github releases
+		BASE_URL="$GH_REPO/releases/download"
+	else
+		# versions before 1.17.0 should download from the legacy url
+		BASE_URL="https://storage.googleapis.com/$TOOL_NAME"
+	fi
+	url="$BASE_URL/$version/$TOOL_NAME-$(get_os)-$(get_arch)"
 	echo ""
 	echo "---------------------"
 	echo "*   Download info    "
